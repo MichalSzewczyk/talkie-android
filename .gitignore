@@ -36,6 +36,7 @@ proguard/
 # Log Files
 *.log
 
+vcs.xml
 
 
 # Intellij
