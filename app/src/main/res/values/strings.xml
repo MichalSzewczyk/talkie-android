@@ -14,4 +14,7 @@
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
+    <string name="instructions">
+        Place your fingertip on the Home button to verify your identity
+    </string>
 </resources>
