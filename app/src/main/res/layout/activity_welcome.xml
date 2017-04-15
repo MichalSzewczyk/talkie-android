@@ -19,12 +19,74 @@
 
         <ImageView
             android:layout_width="wrap_content"
-            android:layout_height="496dp"
+            android:layout_height="match_parent"
             app:srcCompat="@drawable/login_background_edited"
             android:scaleType = "centerCrop"
             android:id="@+id/imageView"
             android:alpha="0.7" />
 
     </FrameLayout>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:foregroundGravity="center_vertical|center_horizontal|center"
+        android:gravity="center_vertical|center_horizontal|center">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"></LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="163dp"
+            android:textAlignment="center">
+
+            <TextView
+                android:text="Choose way of login"
+                android:layout_width="match_parent"
+                android:layout_height="116dp"
+                android:id="@+id/textView"
+                android:fontFamily="sans-serif-smallcaps"
+                android:textSize="@dimen/main_font_size"
+                android:textColor="@color/white"
+                android:textAlignment="center" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center">
+
+            <Button
+                android:text="Normal login"
+                android:layout_width="190px"
+                android:layout_height="wrap_content"
+                android:id="@+id/button5"
+                android:layout_weight="0.41"
+                android:width="190px"
+                android:gravity="center" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:foregroundGravity="center">
+
+            <Button
+                android:text="Fingerprint login"
+                android:layout_height="wrap_content"
+                android:id="@+id/fingerprint_login_button"
+                android:gravity="center_vertical|center_horizontal|center"
+                android:layout_width="match_parent" />
+        </LinearLayout>
+    </LinearLayout>
+
 </RelativeLayout>
 
