@@ -17,7 +17,8 @@ public class WelcomeActivity extends AppCompatActivity {
 
     private void setListeners(){
         fingerprintLoginButton.setOnClickListener((a) -> {
-
+            Intent intent = new Intent(this, FingerprintActivity.class);
+            startActivity(intent);
         });
 
         normalLoginButton.setOnClickListener((a) -> {

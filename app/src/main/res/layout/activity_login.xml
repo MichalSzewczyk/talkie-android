@@ -95,6 +95,14 @@
                 android:text="@string/action_sign_in"
                 android:textStyle="bold" />
 
+            <ToggleButton
+                android:text="Remember me"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textOff="Remember me option is disabled."
+                android:textOn="Remember me option is enabled."
+                android:id="@+id/rememberToggle" />
+
         </LinearLayout>
     </ScrollView>
 </RelativeLayout>

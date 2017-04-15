@@ -37,7 +37,7 @@
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="30dp"></LinearLayout>
+            android:layout_height="20dp"></LinearLayout>
 
         <LinearLayout
             android:orientation="horizontal"
@@ -63,7 +63,7 @@
             android:gravity="center">
 
             <Button
-                android:text="Normal login"
+                android:text="Login"
                 android:layout_width="190px"
                 android:layout_height="wrap_content"
                 android:id="@+id/normal_login_button"
@@ -80,7 +80,7 @@
             android:foregroundGravity="center">
 
             <Button
-                android:text="Fingerprint login"
+                android:text="Login to last account"
                 android:layout_height="wrap_content"
                 android:id="@+id/fingerprint_login_button"
                 android:gravity="center_vertical|center_horizontal|center"
