@@ -3,19 +3,19 @@ package com.talkie.talkie_android;
 import java.io.Serializable;
 
 public class Tuple<L, P> implements Serializable {
-    private final L l;
-    private final P p;
+    private final L key;
+    private final P value;
 
-    public Tuple(L l, P p) {
-        this.l = l;
-        this.p = p;
+    public Tuple(L key, P value) {
+        this.key = key;
+        this.value = value;
     }
 
-    public L getL() {
-        return l;
+    public L getKey() {
+        return key;
     }
 
-    public P getP() {
-        return p;
+    public P getValue() {
+        return value;
     }
 }
