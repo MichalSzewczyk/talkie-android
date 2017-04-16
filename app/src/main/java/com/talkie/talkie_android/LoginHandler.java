@@ -8,4 +8,6 @@ public interface LoginHandler {
     void storeCredentials(String login, String password);
 
     Optional<Tuple> getStoredCredentials();
+
+    boolean isDataAvailable();
 }
