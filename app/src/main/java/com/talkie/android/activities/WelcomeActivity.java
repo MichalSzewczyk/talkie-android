@@ -1,9 +1,13 @@
-package com.talkie.talkie_android;
+package com.talkie.android.activities;
 
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.Button;
+
+import com.talkie.android.services.interfaces.LoginHandler;
+import com.talkie.android.R;
+import com.talkie.android.services.impl.StoredLoginHandler;
 
 
 public class WelcomeActivity extends AppCompatActivity {

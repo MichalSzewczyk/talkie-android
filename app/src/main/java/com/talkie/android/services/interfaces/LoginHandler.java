@@ -1,6 +1,6 @@
-package com.talkie.talkie_android;
+package com.talkie.android.services.interfaces;
 
-import android.app.Activity;
+import com.talkie.android.utils.Tuple;
 
 import java.util.Optional;
 

@@ -1,7 +1,9 @@
-package com.talkie.talkie_android;
+package com.talkie.android.services.impl;
 
 
 import android.util.Base64;
+
+import com.talkie.android.services.interfaces.EncryptionService;
 
 public class EncryptionServiceImpl implements EncryptionService {
     @Override

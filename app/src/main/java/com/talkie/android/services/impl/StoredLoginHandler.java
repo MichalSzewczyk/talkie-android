@@ -1,4 +1,4 @@
-package com.talkie.talkie_android;
+package com.talkie.android.services.impl;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -9,6 +9,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.talkie.dialect.parser.impl.JsonParsingFacade;
 import com.talkie.dialect.parser.impl.MessageTypeMatcher;
 import com.talkie.dialect.parser.interfaces.ParsingService;
+import com.talkie.android.services.interfaces.EncryptionService;
+import com.talkie.android.services.interfaces.LoginHandler;
+import com.talkie.android.utils.Tuple;
 
 import java.util.Optional;
 

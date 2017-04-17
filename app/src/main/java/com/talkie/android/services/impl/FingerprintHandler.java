@@ -1,4 +1,4 @@
-package com.talkie.talkie_android;
+package com.talkie.android.services.impl;
 
 import android.annotation.TargetApi;
 import android.content.Context;

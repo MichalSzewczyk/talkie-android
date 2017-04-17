@@ -1,4 +1,4 @@
-package com.talkie.talkie_android;
+package com.talkie.android.activities;
 
 import android.app.KeyguardManager;
 import android.content.pm.PackageManager;
@@ -12,6 +12,9 @@ import android.security.keystore.KeyProperties;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v4.app.ActivityCompat;
 import android.widget.TextView;
+
+import com.talkie.android.services.impl.FingerprintHandler;
+import com.talkie.android.R;
 
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;

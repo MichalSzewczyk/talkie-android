@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.talkie.talkie_android">
+    package="com.talkie.android">
 
     <!-- To auto-complete the email text field in the login form with the user's emails -->
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
@@ -19,7 +19,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".WelcomeActivity">
+        <activity android:name="com.talkie.android.activities.WelcomeActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -27,16 +27,16 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".LoginActivity"
+            android:name="com.talkie.android.activities.LoginActivity"
             android:label="@string/title_activity_login"
-            android:parentActivityName=".WelcomeActivity">
+            android:parentActivityName="com.talkie.android.activities.WelcomeActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.talkie.talkie_android.WelcomeActivity" />
+                android:value="com.talkie.android.activities.WelcomeActivity" />
         </activity>
-        <activity android:name=".FingerprintActivity" />
+        <activity android:name="com.talkie.android.activities.FingerprintActivity" />
         <activity
-            android:name=".MessengerActivity"
+            android:name="com.talkie.android.activities.MessengerActivity"
             android:label="@string/title_activity_messenger"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>

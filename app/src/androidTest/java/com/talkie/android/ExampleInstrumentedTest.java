@@ -1,4 +1,4 @@
-package com.talkie.talkie_android;
+package com.talkie.android;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

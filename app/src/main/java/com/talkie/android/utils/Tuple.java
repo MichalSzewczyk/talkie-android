@@ -1,4 +1,4 @@
-package com.talkie.talkie_android;
+package com.talkie.android.utils;
 
 import java.io.Serializable;
 

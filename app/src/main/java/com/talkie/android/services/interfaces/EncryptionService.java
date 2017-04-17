@@ -1,4 +1,4 @@
-package com.talkie.talkie_android;
+package com.talkie.android.services.interfaces;
 
 public interface EncryptionService {
     String decrypt(String encrypted);
