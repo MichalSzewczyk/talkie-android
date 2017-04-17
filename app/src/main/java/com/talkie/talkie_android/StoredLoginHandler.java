@@ -17,29 +17,11 @@ public class StoredLoginHandler implements LoginHandler {
     private final ParsingService parsingService;
     private final SharedPreferences settings;
     private final EncryptionService encryptionService;
-    private static StoredLoginHandler instance;
-    private static Context context;
 
-    private StoredLoginHandler(Context context) {
+    public StoredLoginHandler(Context context) {
         parsingService = new JsonParsingFacade(new ObjectMapper(), new MessageTypeMatcher());
         this.settings = PreferenceManager.getDefaultSharedPreferences(context);
         this.encryptionService = new EncryptionServiceImpl();
-    }
-
-    public static void init(Context context){
-        if(context != null) throw new IllegalStateException("Reinitialization of login handler.");
-        StoredLoginHandler.context = context;
-    }
-
-    public static StoredLoginHandler getStoredLoginHandler (){
-        if(instance == null){
-            synchronized (instance) {
-                if(instance == null) {
-                    instance = new StoredLoginHandler(context);
-                }
-            }
-        }
-        return instance;
     }
 
     @Override
