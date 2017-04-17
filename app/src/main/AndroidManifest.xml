@@ -7,6 +7,7 @@
     <uses-permission android:name="android.permission.READ_PROFILE" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.USE_FINGERPRINT" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <uses-feature
         android:name="android.hardware.fingerprint"
@@ -33,7 +34,11 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.talkie.talkie_android.WelcomeActivity" />
         </activity>
-        <activity android:name=".FingerprintActivity"></activity>
+        <activity android:name=".FingerprintActivity" />
+        <activity
+            android:name=".MessengerActivity"
+            android:label="@string/title_activity_messenger"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>
