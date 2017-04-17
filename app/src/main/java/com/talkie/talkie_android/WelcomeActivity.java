@@ -14,7 +14,7 @@ public class WelcomeActivity extends AppCompatActivity {
     private void initElements(){
         fingerprintLoginButton = (Button) findViewById(R.id.fingerprint_login_button);
         normalLoginButton = (Button) findViewById(R.id.normal_login_button);
-        if(loginHandler.isDataAvailable()) normalLoginButton.setEnabled(false);
+        if(!loginHandler.isDataAvailable()) fingerprintLoginButton.setEnabled(false);
     }
 
     private void setListeners(){
@@ -32,8 +32,7 @@ public class WelcomeActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        StoredLoginHandler.init(this.getApplicationContext());
-        loginHandler = StoredLoginHandler.getStoredLoginHandler();
+        this.loginHandler = new StoredLoginHandler(this.getApplicationContext());
         setContentView(R.layout.activity_welcome);
         initElements();
         setListeners();
