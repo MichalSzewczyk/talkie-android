@@ -13,12 +13,12 @@ import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
 
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
@@ -26,10 +26,20 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.talkie.android.R;
+import com.talkie.android.rest.tasks.AbstractTask;
+import com.talkie.dialect.messages.enums.DatabaseOperationMessage;
+import com.talkie.dialect.messages.model.User;
+import com.talkie.dialect.parser.impl.JsonParsingFacade;
+import com.talkie.dialect.parser.impl.MessageTypeMatcher;
+import com.talkie.dialect.parser.interfaces.ParsingService;
+
+import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -37,20 +47,17 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     private static final int REQUEST_READ_CONTACTS = 0;
 
-    /**
-     * A dummy authentication store containing known user names and passwords.
-     * TODO: remove after connecting to a real authentication system.
-     */
-    private static final String[] DUMMY_CREDENTIALS = new String[]{
-            "foo@example.com:hello", "bar@example.com:world"
-    };
-
     private UserLoginTask mAuthTask = null;
 
     private AutoCompleteTextView mEmailView;
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
+    private final ParsingService parsingService;
+
+    public LoginActivity() {
+        parsingService = new JsonParsingFacade(new ObjectMapper(), new MessageTypeMatcher());
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,15 +120,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     private void setupActionBar() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB && getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
     }
 
     private void attemptLogin() {
-        if (mAuthTask != null) {
-            return;
-        }
 
         mEmailView.setError(null);
         mPasswordView.setError(null);
@@ -132,7 +136,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         boolean cancel = false;
         View focusView = null;
 
-        if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
+        if (TextUtils.isEmpty(password)) {
             mPasswordView.setError(getString(R.string.error_invalid_password));
             focusView = mPasswordView;
             cancel = true;
@@ -140,10 +144,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         if (TextUtils.isEmpty(email)) {
             mEmailView.setError(getString(R.string.error_field_required));
-            focusView = mEmailView;
-            cancel = true;
-        } else if (!isEmailValid(email)) {
-            mEmailView.setError(getString(R.string.error_invalid_email));
             focusView = mEmailView;
             cancel = true;
         }
@@ -155,16 +155,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             mAuthTask = new UserLoginTask(email, password);
             mAuthTask.execute((Void) null);
         }
-    }
-
-    private boolean isEmailValid(String email) {
-        //TODO: Replace this with your own logic
-        return email.contains("@");
-    }
-
-    private boolean isPasswordValid(String password) {
-        //TODO: Replace this with your own logic
-        return password.length() > 4;
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
@@ -244,48 +234,60 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         int IS_PRIMARY = 1;
     }
 
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
+    public class UserLoginTask extends AbstractTask<User> {
 
-        private final String mEmail;
+        private final String login;
         private final String mPassword;
 
-        UserLoginTask(String email, String password) {
-            mEmail = email;
+        UserLoginTask(String login, String password) {
+            this.login = login;
             mPassword = password;
         }
 
         @Override
-        protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
-
+        protected User doInBackground(Void... params) {
+            RestTemplate restTemplate = new RestTemplate();
+            String result = restTemplate.postForEntity(ORIGIN, String.format(LOGIN_REQUEST, login, mPassword), String.class).getBody();
+            result = result.replace("{\"login\":", "");
+            result = result.replace("}}", "}");
+            Optional<User> deserializedResult = parsingService.deserialize(result, User.class);
             try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                return false;
+                return deserializedResult.orElseThrow(() -> new RuntimeException("Deserialization failed."));
+            } catch (Throwable throwable) {
+                Log.e("Deserialization failed.", throwable.toString());
             }
-
-            for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mEmail)) {
-                    return pieces[1].equals(mPassword);
-                }
-            }
-
-            // TODO: register the new account here.
-            return true;
+            return null;
         }
 
         @Override
-        protected void onPostExecute(final Boolean success) {
-            mAuthTask = null;
+        protected void onPostExecute(final User result) {
             showProgress(false);
 
-            if (success) {
+            if (result == null) {
                 finish();
-            } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
+                return;
             }
+            switch (DatabaseOperationMessage.valueOf(result.getMessage())) {
+                case USER_NOT_FOUND:
+                    mEmailView.setError("User not exists.");
+                    mEmailView.requestFocus();
+                    break;
+                case INCORRECT_PASSWORD:
+                    mPasswordView.setError(getString(R.string.error_incorrect_password));
+                    mPasswordView.requestFocus();
+                    break;
+                case SUCCESS:
+                    handleSuccess(result);
+                    break;
+                default:
+                    throw new RuntimeException("Unsupported login result.");
+
+            }
+        }
+
+        private void handleSuccess(User result) {
+            //TODO: handle moving to next activity
+            System.out.println(result.getFriends());
         }
 
         @Override
