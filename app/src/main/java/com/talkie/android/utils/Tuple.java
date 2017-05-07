@@ -2,20 +2,31 @@ package com.talkie.android.utils;
 
 import java.io.Serializable;
 
-public class Tuple<L, P> implements Serializable {
-    private final L key;
-    private final P value;
+public class Tuple implements Serializable {
+    private String key;
+    private String value;
 
-    public Tuple(L key, P value) {
+    public Tuple(String key, String value) {
         this.key = key;
         this.value = value;
     }
 
-    public L getKey() {
+    public Tuple() {
+    }
+
+    public String getKey() {
         return key;
     }
 
-    public P getValue() {
+    public String getValue() {
         return value;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
     }
 }
