@@ -13,8 +13,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v4.app.ActivityCompat;
 import android.widget.TextView;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.talkie.android.factories.ParsingServiceFactory;
 import com.talkie.android.services.impl.FingerprintHandler;
 import com.talkie.android.R;
+import com.talkie.dialect.parser.impl.JsonParsingFacade;
+import com.talkie.dialect.parser.impl.MessageTypeMatcher;
+import com.talkie.dialect.parser.interfaces.ParsingService;
 
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
@@ -29,6 +34,9 @@ import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
+
+import static com.talkie.android.ParsingServiceType.CUSTOM_SERVICE;
+
 public class FingerprintActivity extends AppCompatActivity {
 
     private static final String KEY_NAME = "yourKey";
@@ -39,6 +47,11 @@ public class FingerprintActivity extends AppCompatActivity {
     private FingerprintManager.CryptoObject cryptoObject;
     private FingerprintManager fingerprintManager;
     private KeyguardManager keyguardManager;
+    private ParsingService parsingService;
+
+    public FingerprintActivity() {
+        this.parsingService = ParsingServiceFactory.getService(CUSTOM_SERVICE);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,7 +90,7 @@ public class FingerprintActivity extends AppCompatActivity {
                 if (initCipher()) {
                     cryptoObject = new FingerprintManager.CryptoObject(cipher);
 
-                    FingerprintHandler helper = new FingerprintHandler(this);
+                    FingerprintHandler helper = new FingerprintHandler(this, parsingService, this);
                     helper.startAuth(fingerprintManager, cryptoObject);
                 }
             }
