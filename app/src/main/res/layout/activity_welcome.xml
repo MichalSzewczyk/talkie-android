@@ -22,7 +22,7 @@
             android:layout_height="match_parent"
             app:srcCompat="@drawable/login_background_edited"
             android:scaleType = "centerCrop"
-            android:id="@+id/imageView"
+            android:id="@+id/avatar"
             android:alpha="0.7" />
 
     </FrameLayout>
@@ -49,7 +49,7 @@
                 android:text="Choose way of login"
                 android:layout_width="match_parent"
                 android:layout_height="116dp"
-                android:id="@+id/textView"
+                android:id="@+id/login"
                 android:fontFamily="sans-serif-smallcaps"
                 android:textSize="@dimen/main_font_size"
                 android:textColor="@color/white"
