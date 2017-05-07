@@ -1,6 +1,8 @@
 package com.talkie.android.services.impl;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.fingerprint.FingerprintManager;
@@ -10,14 +12,25 @@ import android.os.CancellationSignal;
 import android.support.v4.app.ActivityCompat;
 import android.widget.Toast;
 
+import com.talkie.android.rest.tasks.UserLoginTask;
+import com.talkie.android.services.interfaces.LoginHandler;
+import com.talkie.android.utils.Tuple;
+import com.talkie.dialect.parser.interfaces.ParsingService;
+
 @TargetApi(Build.VERSION_CODES.M)
 public class FingerprintHandler extends FingerprintManager.AuthenticationCallback {
 
     private CancellationSignal cancellationSignal;
     private Context context;
+    private LoginHandler loginHandler;
+    private ParsingService parsingService;
+    private Activity activity;
 
-    public FingerprintHandler(Context mContext) {
-        context = mContext;
+    public FingerprintHandler(Context mContext, ParsingService parsingService, Activity activity) {
+        this.context = mContext;
+        this.loginHandler = new StoredLoginHandler(mContext);
+        this.parsingService = parsingService;
+        this.activity = activity;
     }
 
     public void startAuth(FingerprintManager manager, FingerprintManager.CryptoObject cryptoObject) {
@@ -44,12 +57,18 @@ public class FingerprintHandler extends FingerprintManager.AuthenticationCallbac
     public void onAuthenticationHelp(int helpMsgId, CharSequence helpString) {
         Toast.makeText(context, "Authentication help\n" + helpString, Toast.LENGTH_LONG).show();
     }
+
     @Override
     public void onAuthenticationSucceeded(
             FingerprintManager.AuthenticationResult result) {
         Toast.makeText(context, "Success!", Toast.LENGTH_LONG).show();
+        PackageManager pm = activity.getPackageManager();
+        pm.setComponentEnabledSetting(new ComponentName(context, activity.getClass()),
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
 
-        //TODO: handle logging in
+        Tuple crud = loginHandler.getStoredCredentials().orElse(null);
+        UserLoginTask loginTask = new UserLoginTask(crud.getKey(), crud.getValue(), parsingService, activity);
+        loginTask.execute();
     }
 
 }

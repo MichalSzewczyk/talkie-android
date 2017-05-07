@@ -49,7 +49,7 @@ public class StoredLoginHandler implements LoginHandler {
     public synchronized void storeCredentials(String login, String password) {
         SharedPreferences.Editor editor = settings.edit();
         String encodedPassword = encryptionService.encode(password);
-        Tuple tuple = new Tuple<>(login, encodedPassword);
+        Tuple tuple = new Tuple(login, encodedPassword);
         String serializedTuple = null;
         try {
             serializedTuple = parsingService.serialize(tuple).orElseThrow(NullPointerException::new);
