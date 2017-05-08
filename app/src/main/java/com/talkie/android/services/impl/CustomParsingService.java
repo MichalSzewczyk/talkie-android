@@ -1,4 +1,4 @@
-package com.talkie.android.services.interfaces;
+package com.talkie.android.services.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 

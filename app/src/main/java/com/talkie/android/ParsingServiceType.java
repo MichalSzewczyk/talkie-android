@@ -1,6 +1,6 @@
 package com.talkie.android;
 
-import com.talkie.android.services.interfaces.CustomParsingService;
+import com.talkie.android.services.impl.CustomParsingService;
 import com.talkie.dialect.parser.interfaces.ParsingService;
 
 public enum ParsingServiceType {
