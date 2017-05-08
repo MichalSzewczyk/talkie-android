@@ -1,13 +1,8 @@
 package com.talkie.android.activities;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.view.SubMenu;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -17,21 +12,28 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.talkie.android.R;
 import com.talkie.android.factories.ParsingServiceFactory;
 import com.talkie.android.rest.tasks.ImageLoadTask;
+import com.talkie.android.services.impl.MessageCachingServiceImpl;
+import com.talkie.android.services.interfaces.MessageCachingService;
 import com.talkie.dialect.messages.model.User;
-import com.talkie.dialect.parser.impl.JsonParsingFacade;
-import com.talkie.dialect.parser.impl.MessageTypeMatcher;
 import com.talkie.dialect.parser.interfaces.ParsingService;
 
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
 
 import static com.talkie.android.ParsingServiceType.CUSTOM_SERVICE;
 
@@ -39,30 +41,66 @@ public class MessengerActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     private ParsingService parsingService;
     private User user;
+    private Toolbar toolbar;
+    private Socket socket;
+    private ListView messages;
+    private TextView recipient;
+    private static final int SERVER_PORT = 8080;
+    private static final String SERVER_HOST = "10.0.2.2";
+    private MessageCachingService messageCachingService;
+    private ArrayAdapter<String> adapter;
+    private Integer actualRecipient;
+    private EditText messageText;
+    private Button sendButton;
 
     public MessengerActivity() {
-        parsingService = ParsingServiceFactory.getService(CUSTOM_SERVICE);
+        this.parsingService = ParsingServiceFactory.getService(CUSTOM_SERVICE);
+        this.messageCachingService = new MessageCachingServiceImpl(this, android.R.layout.simple_list_item_1);
     }
 
     private void refreshData() {
 
     }
 
+    private void setActualRecipient(int recId){
+        messages.setAdapter(messageCachingService.getHistory(recId));
+        this.recipient.setText(String.valueOf(recId));
+        this.actualRecipient = recId;
+    }
+
+    private void persistMessage(String message){
+        adapter.add(message);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_messenger);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        this.toolbar = (Toolbar) findViewById(R.id.toolbar);
+        this.messages = (ListView) findViewById(R.id.messages);
+        this.recipient = (TextView) findViewById(R.id.recipient);
+        this.user = parsingService.deserialize(getIntent().getStringExtra(getString(R.string.user_data)), User.class).orElse(null);
+        this.messageText = (EditText) findViewById(R.id.message);
+        this.sendButton = (Button) findViewById(R.id.send_message);
+        sendButton.setOnClickListener(o ->{
+            try {
+                PrintWriter out = new PrintWriter(new BufferedWriter(
+                new OutputStreamWriter(socket.getOutputStream())),
+                true);
+                out.println(messageText.getText());
+                messageText.setText("");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        });
+        messageCachingService.persist(user.getId(), 1, 2, "asd");
+
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+        fab.setOnClickListener(view -> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                .setAction("Action", null).show());
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -73,9 +111,9 @@ public class MessengerActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.setItemIconTintList(null);
+
         View header = navigationView.getHeaderView(0);
         Menu navMenu = navigationView.getMenu();
-        this.user = parsingService.deserialize(getIntent().getStringExtra(getString(R.string.user_data)), User.class).orElse(null);
         TextView nameAndSurname = (TextView) header.findViewById(R.id.nameAndSurname);
         nameAndSurname.setText(user.getName() + " " + user.getLastName());
         TextView login = (TextView) header.findViewById(R.id.login);
@@ -88,10 +126,31 @@ public class MessengerActivity extends AppCompatActivity
         avatar.setMaxHeight(20);
         int id = 0;
         for (User u : user.getFriends()) {
-            navMenu.add(0, id++, 0, u.getName() + u.getLastName()).setShortcut('3', 'c').setIcon((!(u.getOnline() == null)) && u.getOnline() ? R.drawable.available_dot : R.drawable.not_available_dot);
+            MenuItem menuItem = navMenu.add(0, id++, 0, u.getName() + u.getLastName()).setShortcut('3', 'c').setIcon((!(u.getOnline() == null)) && u.getOnline() ? R.drawable.available_dot : R.drawable.not_available_dot);
+            menuItem.setOnMenuItemClickListener(o -> {
+                setActualRecipient(u.getId());
+                return true;
+            });
         }
+        Thread clientThread = new Thread(new ClientThread());
+        clientThread.setDaemon(true);
+        clientThread.start();
     }
 
+    private class ClientThread implements Runnable {
+
+        @Override
+        public void run() {
+            try {
+                InetAddress serverAddr = InetAddress.getByName(SERVER_HOST);
+                socket = new Socket(serverAddr, SERVER_PORT);
+            } catch (UnknownHostException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
 
     @Override
