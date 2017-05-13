@@ -45,8 +45,8 @@ public class MessengerActivity extends AppCompatActivity
     private Socket socket;
     private ListView messages;
     private TextView recipient;
-    private static final int SERVER_PORT = 8080;
-    private static final String SERVER_HOST = "10.0.2.2";
+    private static final int SERVER_PORT = 90;
+    private static final String SERVER_HOST = "52.42.71.54";
     private MessageCachingService messageCachingService;
     private ArrayAdapter<String> adapter;
     private Integer actualRecipient;
@@ -129,6 +129,7 @@ public class MessengerActivity extends AppCompatActivity
             MenuItem menuItem = navMenu.add(0, id++, 0, u.getName() + u.getLastName()).setShortcut('3', 'c').setIcon((!(u.getOnline() == null)) && u.getOnline() ? R.drawable.available_dot : R.drawable.not_available_dot);
             menuItem.setOnMenuItemClickListener(o -> {
                 setActualRecipient(u.getId());
+                System.out.println("foo");
                 return true;
             });
         }
