@@ -21,5 +21,4 @@ public abstract class AbstractTask<T> extends AsyncTask<Void, Void, T> {
             "                message\n" +
             "              }\n" +
             "            }";
-
 }

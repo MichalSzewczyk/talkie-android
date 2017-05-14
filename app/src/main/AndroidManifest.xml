@@ -11,7 +11,7 @@
 
     <uses-feature
         android:name="android.hardware.fingerprint"
-        android:required="false" />
+        android:required="true" />
 
     <application
         android:allowBackup="true"
@@ -34,7 +34,10 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.talkie.android.activities.WelcomeActivity" />
         </activity>
-        <activity android:name="com.talkie.android.activities.FingerprintActivity" />
+        <activity
+            android:name="com.talkie.android.activities.FingerprintActivity"
+            android:label="FingerprintActivity"
+            android:parentActivityName="com.talkie.android.activities.WelcomeActivity" />
         <activity
             android:name="com.talkie.android.activities.MessengerActivity"
             android:label="@string/title_activity_messenger"

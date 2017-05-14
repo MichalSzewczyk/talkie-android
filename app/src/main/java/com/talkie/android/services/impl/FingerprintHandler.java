@@ -17,7 +17,7 @@ import com.talkie.android.services.interfaces.LoginHandler;
 import com.talkie.android.utils.Tuple;
 import com.talkie.dialect.parser.interfaces.ParsingService;
 
-@TargetApi(Build.VERSION_CODES.M)
+@TargetApi(24)
 public class FingerprintHandler extends FingerprintManager.AuthenticationCallback {
 
     private CancellationSignal cancellationSignal;
