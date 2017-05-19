@@ -24,6 +24,8 @@ import com.talkie.android.factories.ParsingServiceFactory;
 import com.talkie.android.rest.tasks.ImageLoadTask;
 import com.talkie.android.services.impl.MessageCachingServiceImpl;
 import com.talkie.android.services.interfaces.MessageCachingService;
+import com.talkie.android.socket.tasks.SocketClient;
+import com.talkie.android.utils.SocketConnectionAdapter;
 import com.talkie.dialect.messages.model.User;
 import com.talkie.dialect.parser.interfaces.ParsingService;
 
@@ -34,6 +36,10 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Observable;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static com.talkie.android.ParsingServiceType.CUSTOM_SERVICE;
 
@@ -72,6 +78,9 @@ public class MessengerActivity extends AppCompatActivity
         adapter.add(message);
     }
 
+    private void init(){
+        Observable observable = new Observable();
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -94,6 +103,7 @@ public class MessengerActivity extends AppCompatActivity
             }
 
         });
+
         messageCachingService.persist(user.getId(), 1, 2, "asd");
 
         setSupportActionBar(toolbar);
@@ -136,6 +146,8 @@ public class MessengerActivity extends AppCompatActivity
         Thread clientThread = new Thread(new ClientThread());
         clientThread.setDaemon(true);
         clientThread.start();
+
+
     }
 
     private class ClientThread implements Runnable {
@@ -145,6 +157,9 @@ public class MessengerActivity extends AppCompatActivity
             try {
                 InetAddress serverAddr = InetAddress.getByName(SERVER_HOST);
                 socket = new Socket(serverAddr, SERVER_PORT);
+                System.out.println("running");
+                new SocketClient(SERVER_HOST, SERVER_PORT).execute();
+//                new SocketConnectionAdapter(socket);
             } catch (UnknownHostException e) {
                 e.printStackTrace();
             } catch (IOException e) {

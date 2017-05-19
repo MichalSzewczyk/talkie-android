@@ -35,7 +35,7 @@
                 android:value="com.talkie.android.activities.WelcomeActivity" />
         </activity>
         <activity
-            android:name="com.talkie.android.activities.FingerprintActivity"
+            android:name=".activities.FingerprintActivity"
             android:label="FingerprintActivity"
             android:parentActivityName="com.talkie.android.activities.WelcomeActivity" />
         <activity

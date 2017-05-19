@@ -66,6 +66,7 @@ public class UserLoginTask extends AbstractTask<User> {
             Log.e(throwable.getLocalizedMessage(), throwable.toString());
         }
         intent.putExtra(activity.getString(R.string.user_data), serializedResult);
+        activity.finish();
         activity.startActivity(intent);
     }
 

@@ -3,7 +3,6 @@ package com.talkie.android.activities;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -28,24 +27,17 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ToggleButton;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.talkie.android.R;
 import com.talkie.android.factories.ParsingServiceFactory;
-import com.talkie.android.rest.tasks.AbstractTask;
 import com.talkie.android.rest.tasks.UserLoginTask;
 import com.talkie.android.services.impl.StoredLoginHandler;
 import com.talkie.android.services.interfaces.LoginHandler;
 import com.talkie.dialect.messages.enums.DatabaseOperationMessage;
 import com.talkie.dialect.messages.model.User;
-import com.talkie.dialect.parser.impl.JsonParsingFacade;
-import com.talkie.dialect.parser.impl.MessageTypeMatcher;
 import com.talkie.dialect.parser.interfaces.ParsingService;
-
-import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static android.Manifest.permission.READ_CONTACTS;
 import static com.talkie.android.ParsingServiceType.CUSTOM_SERVICE;
