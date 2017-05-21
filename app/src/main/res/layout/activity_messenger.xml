@@ -19,10 +19,7 @@
             android:stretchColumns="*"
             android:layout_height="wrap_content" >
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/recipient" />
+
         </TableRow>
 
         <TableRow
@@ -30,23 +27,14 @@
             android:stretchColumns="*"
             android:layout_height="411dp" >
 
-            <ListView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:id="@+id/messages" />
+
         </TableRow>
 
         <TableRow
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
+            android:layout_height="match_parent" >
 
-            <EditText
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textPersonName"
-                android:text="Name"
-                android:ems="10"
-                android:id="@+id/message" />
+
         </TableRow>
 
         <TableRow
@@ -54,14 +42,7 @@
             android:stretchColumns="*"
             android:layout_height="wrap_content" >
 
-            <Button
-                android:text="Send message"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/send_message"
-                android:layout_column="0"
-                tools:layout_gravity="center"
-                android:layout_gravity="center" />
+
         </TableRow>
     </LinearLayout>
 

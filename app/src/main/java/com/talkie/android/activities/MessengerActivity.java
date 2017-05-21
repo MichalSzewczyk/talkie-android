@@ -19,23 +19,30 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.github.nkzawa.emitter.Emitter;
+import com.github.nkzawa.socketio.client.IO;
+import com.github.nkzawa.socketio.client.Socket;
 import com.talkie.android.R;
 import com.talkie.android.factories.ParsingServiceFactory;
 import com.talkie.android.rest.tasks.ImageLoadTask;
 import com.talkie.android.services.impl.MessageCachingServiceImpl;
+import com.talkie.android.services.impl.SocketMessageService;
 import com.talkie.android.services.interfaces.MessageCachingService;
-import com.talkie.android.socket.tasks.SocketClient;
-import com.talkie.android.utils.SocketConnectionAdapter;
+import com.talkie.android.services.interfaces.MessageService;
 import com.talkie.dialect.messages.model.User;
 import com.talkie.dialect.parser.interfaces.ParsingService;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.InetAddress;
-import java.net.Socket;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.Observable;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -50,14 +57,17 @@ public class MessengerActivity extends AppCompatActivity
     private Toolbar toolbar;
     private Socket socket;
     private ListView messages;
-    private TextView recipient;
-    private static final int SERVER_PORT = 90;
-    private static final String SERVER_HOST = "52.42.71.54";
+    private TextView recipientView;
+    private static final String SERVER_PORT = "23";
+    //"52.42.71.54"  90  8090/echo
+    private static final String SERVER_HOST = "http://10.0.2.2";
     private MessageCachingService messageCachingService;
     private ArrayAdapter<String> adapter;
     private Integer actualRecipient;
     private EditText messageText;
     private Button sendButton;
+    private MessageService messageService;
+    private TextView recipient;
 
     public MessengerActivity() {
         this.parsingService = ParsingServiceFactory.getService(CUSTOM_SERVICE);
@@ -68,11 +78,23 @@ public class MessengerActivity extends AppCompatActivity
 
     }
 
-    private void setActualRecipient(int recId){
+    private void setActualRecipient(int recId, String login){
         messages.setAdapter(messageCachingService.getHistory(recId));
-        this.recipient.setText(String.valueOf(recId));
+        this.recipient.setText(login);
         this.actualRecipient = recId;
     }
+
+    private Emitter.Listener onNewMessage = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    System.err.println(Arrays.toString(args));
+                }
+            });
+        }
+    };
 
     private void persistMessage(String message){
         adapter.add(message);
@@ -89,28 +111,24 @@ public class MessengerActivity extends AppCompatActivity
         this.messages = (ListView) findViewById(R.id.messages);
         this.recipient = (TextView) findViewById(R.id.recipient);
         this.user = parsingService.deserialize(getIntent().getStringExtra(getString(R.string.user_data)), User.class).orElse(null);
+        this.messageService = new SocketMessageService(SERVER_HOST, SERVER_PORT, user.getId());
         this.messageText = (EditText) findViewById(R.id.message);
         this.sendButton = (Button) findViewById(R.id.send_message);
-        sendButton.setOnClickListener(o ->{
-            try {
-                PrintWriter out = new PrintWriter(new BufferedWriter(
-                new OutputStreamWriter(socket.getOutputStream())),
-                true);
-                out.println(messageText.getText());
-                messageText.setText("");
-            } catch (IOException e) {
-                e.printStackTrace();
+        this.recipient = (TextView) findViewById(R.id.recipient);
+        sendButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                System.out.println("sending message...");
+                if(actualRecipient == null){
+
+                }else {
+                    messageService.sendMessage(user.getId(), actualRecipient, MessengerActivity.this.messageText.getText().toString());
+                }
             }
-
         });
-
         messageCachingService.persist(user.getId(), 1, 2, "asd");
 
         setSupportActionBar(toolbar);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(view -> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show());
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -138,36 +156,13 @@ public class MessengerActivity extends AppCompatActivity
         for (User u : user.getFriends()) {
             MenuItem menuItem = navMenu.add(0, id++, 0, u.getName() + u.getLastName()).setShortcut('3', 'c').setIcon((!(u.getOnline() == null)) && u.getOnline() ? R.drawable.available_dot : R.drawable.not_available_dot);
             menuItem.setOnMenuItemClickListener(o -> {
-                setActualRecipient(u.getId());
-                System.out.println("foo");
+                setActualRecipient(u.getId(), user.getLogin());
                 return true;
             });
         }
-        Thread clientThread = new Thread(new ClientThread());
-        clientThread.setDaemon(true);
-        clientThread.start();
 
 
     }
-
-    private class ClientThread implements Runnable {
-
-        @Override
-        public void run() {
-            try {
-                InetAddress serverAddr = InetAddress.getByName(SERVER_HOST);
-                socket = new Socket(serverAddr, SERVER_PORT);
-                System.out.println("running");
-                new SocketClient(SERVER_HOST, SERVER_PORT).execute();
-//                new SocketConnectionAdapter(socket);
-            } catch (UnknownHostException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
 
     @Override
     public void onBackPressed() {
@@ -218,5 +213,9 @@ public class MessengerActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void login(){
+
     }
 }
